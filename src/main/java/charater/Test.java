@@ -30,11 +30,15 @@ public class Test {
 	private static void charset(){
 		Charset defualttCharset = Charset.defaultCharset();
 		System.out.println(defualttCharset); 
+		
+		
 	}
 	
 	private static void chinese() {
 		char character = 'жа';
 	}
+	
+	
 	
 	
 }

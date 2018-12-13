@@ -1,12 +1,19 @@
 package genericity;
 
 
-public class Dog<T extends String,D> extends Animal<T>{
+public class Dog extends Animal<String>{
 
-	public D d;
-	
-	public Dog(T t,D d) {
-		super(t);
-		this.d = d;
+	public Dog(String name) {
+		super(name);
 	}
+	
+
+	@Override
+	String getValue() {
+		return "Dog";
+	}
+	
+	
+	
+
 }

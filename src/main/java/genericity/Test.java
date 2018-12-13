@@ -1,12 +1,17 @@
 package genericity;
 
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,164 +33,143 @@ import java.util.Map;
  * 		{@link GenericArrayType} 其成员类型为泛型的数组类型。
  * 		{@link WildcardType} 通配符类型？ <? extends T>   <? super T>
  * 
+ * 
+ * ? 代表任意类型
+ * ? extends T 代表T及其子类的任意类型
+ * ? super T 代表T及T父类的任意类型
+ *
+ * Class A ,Class B extends A.
+ * List<A> != List<B>;
+ * List<? extends A> = List<A>; List<? extends A> = List<B>;List<? extends A> = List<? extends B>
+ * List<? super B> = List<B>; List<? super B> = List<A>;
+ * ? extends A != A != B != ? super B;
+ * 
  * @author Administrator
  *
  */
 public class Test {
+	
+	private List<String> list = new ArrayList<>();
+	
 	public static void main(String[] args) {
-		List<? extends Map<String, String>> list5 
-				= new ArrayList<HashMap<String,String>>();
-//		
-//		types("List getTypeParameters",list5.getClass().getTypeParameters(),true);
-//		
-//		types("A getTypeParameters",A.class.getTypeParameters(),true);
-//		types("B getTypeParameters",B.class.getTypeParameters(),true);
-//		types("C getTypeParameters",C.class.getTypeParameters(),true);
-//		
-//		type("String getGenericSuperclass",F.class.getGenericSuperclass(),true);
-//		types("String getGenericInterfaces",F.class.getGenericInterfaces(),true);
 		
+//		List<? extends Integer> listUpper = new ArrayList<>();
+//		testUpperWildcards(listUpper); 
+//		
+//		List<? super Integer> listLower = new ArrayList<>();
+//		testLowerWildcards(listLower);
 		
-		test();
+//		testMethodParameterType();
+		
+		testFieldType();
 		
  	}
 	
-	
-	private static void test() {
-		Type type = Dog.class.getGenericSuperclass();
-		type("Dog GenericSuperclass",type,true);
-		Type[] types = Dog.class.getGenericInterfaces();
-		types("Dog GenericInterfaces",types,true); 
-		TypeVariable<Class<Dog>>[] typeParameters = Dog.class.getTypeParameters();
-		types("Dog TypeParameters",typeParameters,true);
-	}
-	
-	
-	private static void types(String prix,Type[] types,boolean deep){
-		for(Type type:types){
-			type(prix,type,deep);
-		}
-	}
-	
-	private static void type(String prix,Type type,boolean deep){
-		
-		System.out.println("--------------------------------------");
-		
-		if(type == null){
-			System.out.println(prix + ":" + null);
-			return;
-		}
-		
-		System.out.println(prix + "Type name:" + type.getTypeName());
-		if(type instanceof ParameterizedType){
-			System.out.println(prix + ":" + "ParameterizedType");
-			ParameterizedType parameterizedType = (ParameterizedType)type;
-			type(prix + " " + "ParameterizedType RawType", parameterizedType.getRawType(),false);
-			type(prix + " " + "ParameterizedType OwnerType", parameterizedType.getOwnerType(),false);
-			Type[] actualTypes = parameterizedType.getActualTypeArguments();
-			for(Type actualType:actualTypes){
-				type(prix + " " + "ParameterizedType ActualTypeArguments", actualType,false);
-			}
-		}else if(type instanceof GenericArrayType){
-			System.out.println(prix + ":" + "ParameterizedType");
-			GenericArrayType genericArrayType = (GenericArrayType)type;
-			type(prix + " " + "getGenericComponentType",genericArrayType.getGenericComponentType(),false);
-		}else if(type instanceof TypeVariable){
-			System.out.println(prix + ":" + "TypeVariable");
-			TypeVariable<?> typeVariable = (TypeVariable<?>)type;
-			System.out.println(prix + " TypeVariable name " + type.getTypeName());
-			AnnotatedType[] annotatedTypes = typeVariable.getAnnotatedBounds();
-			for(AnnotatedType anootatedType:annotatedTypes){
-				System.out.println(prix + " " + "TypeVariable AnnotatedBounds " + anootatedType.getClass().getName()); 
-			}
-			Type[] bounds = typeVariable.getBounds();
-			for(Type bound:bounds){
-				type(prix + " " + "TypeVariable Bounds",bound,false);
-			}
-		}else if(type instanceof WildcardType){
-			System.out.println(prix + ":" + "WildcardType");
-			WildcardType wildcardType = (WildcardType)type;
-			types(prix + " " + "WildcardType LowerBounds",wildcardType.getLowerBounds(),false);
-			types(prix + " " + "WildcardType UpperBounds",wildcardType.getUpperBounds(),false);
-		}
-	}
-	
-	private static class A<A>{
-		
-	}
-	
-	private static class B<String>{
-		
-	}
-	
-	private static class C<C extends String>{ 
-		
-	}
-	
-	private interface E<E> {
-		
-	}
-	
-	private static class F<F> extends C<String>{ 
-		
-	}
-	
-	public static <T> void add(T t){
-		
-	}
-	
-	
-	private interface UnaryFunction<T>{
-		T apply(T arg);
-	}
-	
-	
-	private static UnaryFunction<String> GENERIC_INSTANCE = new UnaryFunction<String>(){
+	/**
+	 *   测试参数化类型
+	 */
+	private static void testMethodParameterType() {
 
-		@Override
-		public String apply(String arg) {
-			return arg;
-		}
-		
-	};
-	
-	@SuppressWarnings("unchecked")
-	private static <T> UnaryFunction<T> identityFunction(){
-		return (UnaryFunction<T>)GENERIC_INSTANCE;
-	}
-	
-	private static void dontKnown(){
-		UnaryFunction<String> str = identityFunction();
-		UnaryFunction<Integer> integer = identityFunction();
-		integer.apply(1);
-	}
-	
-	
-	
-	
-	
-	private class Favoriter{
-		private Map<Class<?>,Object> favorites = new HashMap<>();
-		
-		public <T> T getFavoriter(Class<T> cls){
+		Class<Test> cls = Test.class;
+		try {
+			Method method = cls.getDeclaredMethod("parameterMethod",List.class);
+			Type returnType = method.getReturnType();
+			Type genericReturnType = method.getGenericReturnType();
+			Parameter[] parameters = method.getParameters();
 			
-			return cls.cast(favorites.get(cls));  
+			Type parameterType = parameters[0].getParameterizedType();
 			
-		}
-		
-		public <T> void setFavoriter(Class<T> cls,T instance){
-			favorites.put(cls, instance);
+			printType(parameterType);
+			
+			printType(genericReturnType);
+			
+			System.out.println("parameters:" + Arrays.toString(parameters)); 
+		} catch (NoSuchMethodException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 	}
 	
-	private void testFavoriter(){
-		Favoriter favoriter = new Favoriter();
-		favoriter.setFavoriter(Integer.class, 1);
-		favoriter.setFavoriter(String.class,"str");
+	
+	private static void testFieldType() {
 		
-		int num = favoriter.getFavoriter(Integer.class);
-		String str = favoriter.getFavoriter(String.class);
+		try {
+			Field field = Test.class.getDeclaredField("list");
+			Type fieldType = field.getGenericType();
+			printType(fieldType);
+		} catch (NoSuchFieldException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
+	
+	
+	private static List<List<String>> parameterMethod(List<List<String>> list){
+		
+		return list;
+		
+	}
+	
+	
+	/**
+	 * 测试上边界 
+	 */
+	public static void testUpperWildcards(List<? extends Integer> list) {
+		
+	}
+	
+	/**
+	 * 测试下边界
+	 */
+	public static void testLowerWildcards(List<? super Integer> list) {
+		
+	}
+	
+	
+	
+	private static void printType(Type type) {
+		System.out.println("#######################################"); 
+		String typeName = type.getTypeName();
+		System.out.println("typeName:" + typeName); 
+		if(type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType)type;
+			Type rawType = parameterizedType.getRawType();
+			Type[] actualTypes = parameterizedType.getActualTypeArguments();
+			Type ownerType = parameterizedType.getOwnerType();
+			System.out.println("ParameterizedType rawType " + rawType.getTypeName());
+			for(Type item:actualTypes) {
+				System.out.println("ParameterizedType actualType " + item.getTypeName());
+			}
+			System.out.println("ParameterizedType ownerType " + ownerType);
+		}else if(type instanceof TypeVariable) {
+			TypeVariable typeVariable = (TypeVariable)type;
+			GenericDeclaration genericDeclaration = typeVariable.getGenericDeclaration();
+			Type[] bounds = typeVariable.getBounds();
+			System.out.println("TypeVariable genericDeclaration:" + Arrays.toString(genericDeclaration.getTypeParameters()));   
+			for(Type item:bounds) {
+				System.out.println("TypeVariable bound " + item.getTypeName());
+			}
+		}else if(type instanceof WildcardType) {
+			WildcardType wildcardType = (WildcardType)type;
+			Type[] lowerTypes = wildcardType.getLowerBounds();
+			Type[] upperTypes = wildcardType.getUpperBounds();
+			
+			for(Type item:lowerTypes) {
+				System.out.println("WildcardType lowerType " + item.getTypeName());
+			}
+			for(Type item:upperTypes) {
+				System.out.println("WildcardType upperType " + item.getTypeName());
+			}
+		}else if(type instanceof GenericArrayType) {
+			GenericArrayType arrayType = (GenericArrayType)type;
+			Type componentType = arrayType.getGenericComponentType();
+			System.out.println("GenericArrayType componentType " + componentType.getTypeName());
+		}
+		System.out.println("#######################################"); 
+	}
+	
+	
 	
 }
